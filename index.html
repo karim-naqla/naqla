@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نقلة | NAQLA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f4f4f4;color:#111}
+header{background:#111;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+header span{color:#f59e0b;margin-inline-start:6px}
+main{max-width:640px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:12px;padding:14px;margin:10px 0;line-height:1.9;box-shadow:0 1px 3px #0002}
+input,select,textarea,button{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font:inherit}
+button{background:#f59e0b;border:0;font-weight:bold;cursor:pointer}
+button.sec{background:#222;color:#fff}
+button.sm{width:auto;padding:6px 12px;margin:6px 4px 0 0}
+header button{width:auto;padding:6px 12px;margin:0}
+.tabs{display:flex;gap:6px}.tabs button{background:#ddd}.tabs button.on{background:#f59e0b}
+.tag{background:#111;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-inline-start:6px}
+.msg{padding:10px;border-radius:8px;background:#fff3cd;margin:8px 0}
+h3{margin:18px 0 4px}
+</style>
+</head>
+<body>
+<header><b>نقلة<span>NAQLA</span></b><button id="out" hidden>خروج</button></header>
+<main id="app">جاري التحميل...</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const sb=supabase.createClient('https://imzuqnhjlgjyokvjxwog.supabase.co','sb_publishable_grSfHJ_E2NmVSxZjVjM5rg_xE8ZX1Hn');
+const $=s=>document.querySelector(s), app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST={pending:'في الانتظار',accepted:'تم القبول',picked_up:'تم الاستلام',delivered:'تم التسليم',cancelled:'ملغي'};
+const opts=a=>a.map(x=>`<option>${x}</option>`).join('');
+let me=null, mode='login';
+
+function card(o,btns=''){
+  return `<div class="card"><b>${esc(o.cargo_type)}</b> · ${esc(o.vehicle_needed||'')}<span class="tag">${ST[o.status]}</span><br>
+  من: ${esc(o.pickup_city)} - ${esc(o.pickup_address)}<br>إلى: ${esc(o.dropoff_city)} - ${esc(o.dropoff_address)}<br>
+  ${o.cargo_details?esc(o.cargo_details)+'<br>':''}السعر: ${esc(o.price)} ج.م${btns}</div>`;
+}
+const btn=(act,id,txt,extra='')=>`<button class="sm" data-act="${act}" data-id="${esc(id)}" ${extra}>${txt}</button>`;
+
+/* ---------- الدخول والتسجيل ---------- */
+function authView(msg=''){
+  $('#out').hidden=true;
+  app.innerHTML=`<div class="tabs"><button class="${mode=='login'?'on':''}" data-mode="login">دخول</button><button class="${mode=='signup'?'on':''}" data-mode="signup">حساب جديد</button></div>
+  ${msg?`<div class="msg">${msg}</div>`:''}
+  <div class="card"><input id="em" type="email" placeholder="الإيميل" dir="ltr"><input id="pw" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" dir="ltr">
+  ${mode=='signup'?`<input id="nm" placeholder="الاسم"><input id="ph" placeholder="رقم الموبايل" dir="ltr"><input id="ct" placeholder="المدينة">
+  <select id="rl"><option value="client">عميل (عايز أنقل شحنة)</option><option value="driver">سائق (عندي عربية)</option></select>`:''}
+  <button id="go">${mode=='login'?'دخول':'إنشاء الحساب'}</button></div>`;
+}
+async function doAuth(){
+  const email=$('#em').value.trim(), password=$('#pw').value;
+  if(mode=='login'){
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error) return authView('خطأ: '+esc(error.message));
+    return load(data.user);
+  }
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:$('#nm').value,phone:$('#ph').value,city:$('#ct').value,role:$('#rl').value}}});
+  if(error) return authView('خطأ: '+esc(error.message));
+  if(!data.session){mode='login';return authView('تم إنشاء الحساب. افتح الإيميل واضغط رابط التأكيد ثم سجل دخول.');}
+  load(data.user);
+}
+
+/* ---------- تحميل البروفايل وتوجيه حسب الدور ---------- */
+async function load(u){
+  const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).single();
+  if(!p) return authView('تعذر تحميل الحساب، جرّب تاني.');
+  me=p; $('#out').hidden=false; render();
+}
+function render(){({client:clientView,driver:driverView,admin:adminView})[me.role]();}
+
+/* ---------- العميل ---------- */
+async function clientView(){
+  const {data}=await sb.from('orders').select('*').eq('client_id',me.id).order('created_at',{ascending:false});
+  app.innerHTML=`<h3>أهلاً ${esc(me.full_name||'')} 👋 اطلب نقلة جديدة</h3>
+  <div class="card"><select id="ct_">${opts(['أثاث','أجهزة كهربائية','بضائع محل','مواد بناء','أخرى'])}</select>
+  <select id="vh">${opts(['ربع نقل','نصف نقل','جامبو','تريلا'])}</select>
+  <input id="pc" placeholder="مدينة التحميل"><input id="pa" placeholder="عنوان التحميل">
+  <input id="dc" placeholder="مدينة التسليم"><input id="da" placeholder="عنوان التسليم">
+  <textarea id="dt" placeholder="تفاصيل الشحنة (اختياري)"></textarea>
+  <input id="pr" type="number" min="0" placeholder="السعر المعروض بالجنيه">
+  <button id="mk">إرسال الطلب</button></div>
+  <h3>طلباتي</h3>${(data||[]).map(o=>card(o,o.status=='pending'?btn('cancel',o.id,'إلغاء','class="sm sec"'):'')).join('')||'<div class="msg">مفيش طلبات لسه.</div>'}`;
+}
+async function makeOrder(){
+  const v=i=>$(i).value.trim();
+  if(!v('#pc')||!v('#pa')||!v('#dc')||!v('#da')||!v('#pr')) return alert('كمّل كل البيانات');
+  const {error}=await sb.from('orders').insert({client_id:me.id,cargo_type:v('#ct_'),vehicle_needed:v('#vh'),pickup_city:v('#pc'),pickup_address:v('#pa'),dropoff_city:v('#dc'),dropoff_address:v('#da'),cargo_details:v('#dt'),price:+v('#pr')});
+  if(error) return alert(error.message);
+  clientView();
+}
+
+/* ---------- السائق ---------- */
+async function driverView(){
+  const {data:d}=await sb.from('drivers').select('*').eq('id',me.id).single();
+  if(!d||!d.approved){app.innerHTML='<div class="msg">حسابك في انتظار موافقة الإدارة. هتقدر تشوف الطلبات بعد الموافقة.</div>';return;}
+  const {data:all}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+  const open=(all||[]).filter(o=>o.status=='pending'), mine=(all||[]).filter(o=>o.driver_id==me.id);
+  app.innerHTML=`<div class="card">مستحقات المنصة عليك (عمولة 15%): <b>${esc(d.balance_due)} ج.م</b></div>
+  <h3>طلبات متاحة</h3>${open.map(o=>card(o,btn('accept',o.id,'قبول الطلب'))).join('')||'<div class="msg">مفيش طلبات متاحة دلوقتي.</div>'}
+  <h3>رحلاتي</h3>${mine.map(o=>card(o,o.status=='accepted'?btn('pick',o.id,'تم الاستلام'):o.status=='picked_up'?btn('deliver',o.id,'تم التسليم'):'')).join('')||'<div class="msg">لسه مفيش رحلات.</div>'}`;
+}
+
+/* ---------- الإدارة ---------- */
+async function adminView(){
+  const {data:ds}=await sb.from('drivers').select('*,profiles(full_name,phone,city)');
+  const {data:os}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+  app.innerHTML=`<h3>السائقين</h3>${(ds||[]).map(d=>`<div class="card"><b>${esc(d.profiles?.full_name||'-')}</b> · ${esc(d.profiles?.phone||'')} · ${esc(d.profiles?.city||'')}<br>
+  الحالة: ${d.approved?'معتمد ✅':'غير معتمد ⏳'} · المستحق: ${esc(d.balance_due)} ج.م<br>
+  ${btn('approve',d.id,d.approved?'إيقاف':'اعتماد',`data-v="${!d.approved}"`)}${btn('pay',d.id,'تسجيل سداد')}</div>`).join('')||'<div class="msg">مفيش سائقين.</div>'}
+  <h3>كل الطلبات (${(os||[]).length})</h3>${(os||[]).map(o=>card(o)).join('')}`;
+}
+
+/* ---------- الأحداث ---------- */
+document.addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.dataset.mode){mode=t.dataset.mode;return authView();}
+  if(t.id=='go') return doAuth();
+  if(t.id=='mk') return makeOrder();
+  if(t.id=='out'){await sb.auth.signOut();me=null;return authView();}
+  const a=t.dataset.act; if(!a) return;
+  const id=t.dataset.id; let r;
+  if(a=='cancel') r=await sb.rpc('cancel_order',{p_order_id:+id});
+  if(a=='accept') r=await sb.rpc('accept_order',{p_order_id:+id});
+  if(a=='pick') r=await sb.rpc('update_order_status',{p_order_id:+id,p_status:'picked_up'});
+  if(a=='deliver') r=await sb.rpc('update_order_status',{p_order_id:+id,p_status:'delivered'});
+  if(a=='approve') r=await sb.rpc('admin_approve_driver',{p_driver_id:id,p_approved:t.dataset.v=='true'});
+  if(a=='pay'){const m=prompt('المبلغ المسدّد بالجنيه:'); if(!m) return; r=await sb.rpc('admin_record_payment',{p_driver_id:id,p_amount:+m});}
+  if(r&&r.error) alert(r.error.message);
+  render();
+});
+sb.auth.getSession().then(({data:{session}})=>session?load(session.user):authView());
+</script>
+</body>
+</html>
