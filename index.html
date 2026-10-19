@@ -161,6 +161,13 @@ sb.auth.getSession().then(({data:{session}})=>session?load(session.user):authVie
     z-index: 9999;
 }
 </style>
-
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/naqla/sw.js').catch(() => {});
+    });
+  }
+</script>
+    
 </body>
 </html>
