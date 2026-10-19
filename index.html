@@ -38,8 +38,8 @@ const $=s=>document.querySelector(s), app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ST={pending:'في الانتظار',accepted:'تم القبول',picked_up:'تم الاستلام',delivered:'تم التسليم',cancelled:'ملغي'};
 const opts=a=>a.map(x=>`<option>${x}</option>`).join('');
+const GOVERNORATES = ['البحيرة', 'الإسكندرية', 'القاهرة', 'الجيزة', 'الغربية', 'المنوفية', 'الشرقية', 'الدقهلية', 'القليوبية', 'كفر الشيخ', 'مطروح', 'أخرى'];
 let me=null, mode='login';
-
 function card(o,btns=''){
   return `<div class="card"><b>${esc(o.cargo_type)}</b> · ${esc(o.vehicle_needed||'')}<span class="tag">${ST[o.status]}</span><br>
   من: ${esc(o.pickup_city)} - ${esc(o.pickup_address)}<br>إلى: ${esc(o.dropoff_city)} - ${esc(o.dropoff_address)}<br>
