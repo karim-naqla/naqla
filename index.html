@@ -3,203 +3,422 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نقلة | NAQLA</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet"><link rel="manifest" href="/naqla/manifest.json">
+<title>نقلة | NAQLA - المنصة الذكية المتكاملة للنقل البري واللوجستيات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="manifest" href="/naqla/manifest.json">
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Cairo,Tahoma,Arial,sans-serif;background:#f4f4f4;color:#111}
+body{margin:0;font-family:Cairo,Tahoma,Arial,sans-serif;background:#f4f4f4;color:#111;padding-bottom:80px}
 header{background:#111;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
 header span{color:#f59e0b;margin-inline-start:6px}
-main{max-width:640px;margin:0 auto;padding:14px}
-.card{background:#fff;border-radius:12px;padding:14px;margin:10px 0;line-height:1.9;box-shadow:0 1px 3px #0002}
-input,select,textarea,button{width:100%;padding:11px;margin:5px 0;border:1px solid #ccc;border-radius:8px;font:inherit}
-button{background:#f59e0b;border:0;font-weight:bold;cursor:pointer}
+main{max-width:700px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:12px;padding:16px;margin:12px 0;line-height:1.9;box-shadow:0 2px 5px rgba(0,0,0,0.08)}
+input,select,textarea,button{width:100%;padding:12px;margin:6px 0;border:1px solid #ccc;border-radius:8px;font:inherit}
+button{background:#f59e0b;border:0;font-weight:bold;cursor:pointer;transition:0.2s}
+button:hover{opacity:0.9}
 button.sec{background:#222;color:#fff}
-button.sm{width:auto;padding:6px 12px;margin:6px 4px 0 0}
+button.sm{width:auto;padding:6px 14px;margin:6px 4px 0 0}
 header button{width:auto;padding:6px 12px;margin:0}
-.tabs{display:flex;gap:6px}.tabs button{background:#ddd}.tabs button.on{background:#f59e0b}
-.tag{background:#111;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-inline-start:6px}
-.msg{padding:10px;border-radius:8px;background:#fff3cd;margin:8px 0}
-h3{margin:18px 0 4px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{background:#ddd}.tabs button.on{background:#f59e0b}
+.tag{background:#111;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;margin-inline-start:6px}
+.msg{padding:12px;border-radius:8px;background:#fff3cd;margin:8px 0;text-align:center;font-weight:bold}
+h3{margin:20px 0 8px;color:#111}
+#map{width:100%;height:220px;border-radius:10px;margin:8px 0;border:1px solid #ccc}
+.whatsapp-btn{position:fixed;bottom:20px;left:20px;background-color:#25d366;color:#fff;padding:12px 18px;border-radius:25px;font-weight:bold;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.3);z-index:9999}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.badge-pay{background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:bold}
+.badge-b2b{background:#fef3c7;color:#b45309;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:bold}
+.call-btn{background:#25d366;color:#fff;text-decoration:none;display:inline-block;padding:6px 14px;border-radius:6px;font-weight:bold;font-size:13px;margin-top:6px}
+.secure-box{background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:8px;margin-top:8px;font-size:13px}
+.checkbox-group{display:flex;align-items:center;gap:10px;margin:10px 0;background:#f9fafb;padding:10px;border-radius:8px;border:1px solid #e5e7eb}
+.checkbox-group input{width:20px;height:20px;margin:0}
 </style>
 </head>
-<body> <!-- شريط التنبيه: المنصة مجانية 100% -->
-<div style="background-color: #e8f5e9; border: 2px solid #4caf50; padding: 12px; border-radius: 12px; text-align: center; margin: 15px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
-    <span style="color: #2e7d32; font-weight: bold; font-size: 16px;">
-        🎉 المنصة مجانية بالكامل حالياً بدون أي عمولة (0%)
+<body>
+
+<div style="background-color:#e8f5e9;border:1px solid #4caf50;padding:10px;border-radius:10px;text-align:center;margin:10px 10px 0;">
+    <span style="color:#2e7d32;font-weight:bold;font-size:13px;">
+        🛡️ منصة نقلة الرسمية والمؤمنة للشركات، المصانع، أصحاب المحاجر، البرادات وسائقي النقل الثقيل
     </span>
 </div>
-<header><b>نقلة<span>NAQLA</span></b><button id="out" hidden>خروج</button></header>
+
+<header>
+  <b>نقلة<span>NAQLA</span></b>
+  <button id="out" hidden>خروج</button>
+</header>
+
 <main id="app">جاري التحميل...</main>
+
+<a href="https://wa.me/201008781263?text=أهلاً%20منصة%20نقلة،%20عندي%20استفسار" class="whatsapp-btn" target="_blank">
+    💬 الدعم والشكاوى
+</a>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const sb=supabase.createClient('https://imzuqnhjlgjyokvjxwog.supabase.co','sb_publishable_grSfHJ_E2NmVSxZjVjM5rg_xE8ZX1Hn');
 const $=s=>document.querySelector(s), app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const ST={pending:'في الانتظار',accepted:'تم القبول',picked_up:'تم الاستلام',delivered:'تم التسليم',cancelled:'ملغي'};
-const opts=a=>a.map(x=>`<option>${x}</option>`).join('');
-const CITIES = {
-  'القاهرة': ['مدينة نصر', 'المعادي', 'حلوان', 'المقطم', 'مصر الجديدة', 'التجمع/الشرق', 'شبرا', 'وسط البلد', 'عين شمس', 'الزيتون', 'المرج', 'السلام', 'المطرية', 'النزهة', 'وايلي', 'عابدين'],
-  'الجيزة': ['الدقي', 'المهندسين', 'الهرم', 'فيصل', 'أكتوبر', 'الشيخ زايد', 'إمبابة', 'العياط', 'البدرشين', 'الصف', 'أوسيم', 'كرداسة', 'أطفيح', 'الواحات البحرية'],
-  'الإسكندرية': ['منتزه', 'شرق', 'وسط', 'غرب', 'عجمي', 'عامرية', 'برج العرب', 'جمرك'],
-  'البحيرة': ['دمنهور', 'كفر الدوار', 'إيتاي البارود', 'حوش عيسى', 'أبو حمص', 'أبو المطامير', 'الدلنجات', 'كوم حمادة', 'رشيد', 'إدكو', 'المحمودية', 'شبراخيت', 'الرحمانية', 'النوبارية', 'وادي النطرون'],
-  'الغربية': ['طنطا', 'المحلة الكبرى', 'زفتى', 'كفر الزيات', 'سمنود', 'بسيون', 'قطور', 'السنطة'],
-  'المنوفية': ['شبين الكوم', 'أشمون', 'منوف', 'السادات', 'الباجور', 'قويسنا', 'تلا', 'الشهداء', 'بركة السبع'],
-  'الشرقية': ['الزقازيق', 'العاشر من رمضان', 'بلبيس', 'فاقوس', 'أبو حماد', 'أبو كبير', 'ههيا', 'ديرب نجم', 'منيا القمح', 'الحسينية', 'إبراهيمية', 'كفر صقر', 'أولاد صقر', 'صالحية'],
-  'الدقهلية': ['المنصورة', 'ميت غمر', 'السنبلاوين', 'دكرنس', 'بلقاس', 'المنزلة', 'شربين', 'طلخا', 'أجا', 'منية النصر', 'تمي الأمديد', 'مطرية', 'جمصة'],
-  'القليوبية': ['بنها', 'شبرا الخيمة', 'شبين القناطر', 'طوخ', 'قليوب', 'الخانكة', 'القناطر الخيرية', 'قها', 'كفر شكر', 'عبور'],
-  'كفر الشيخ': ['كفر الشيخ', 'دسوق', 'بلطيم', 'مطوبس', 'فوة', 'بيلا', 'الرياض', 'سيدي سالم', 'قلين', 'الحامول'],
-  'مطروح': ['مرسى مطروح', 'العلمين', 'الحمام', 'الضبعة', 'سيوة', 'النجيلة', 'سلوم', 'براني'],
-  'الفيوم': ['الفيوم', 'سنورس', 'طامية', 'إطسا', 'أبشواي', 'يوسف الصديق'],
-  'بني سويف': ['بني سويف', 'الواسطى', 'ناصر', 'ببا', 'الفشن', 'إهناسيا', 'سمسطا'],
-  'المنيا': ['المنيا', 'ملوي', 'مغاغة', 'بني مزار', 'أبو قرقاص', 'سمالوط', 'مطاي', 'دير مواس', 'عدوة'],
-  'أسيوط': ['أسيوط', 'ديروط', 'القوصية', 'أبنوب', 'منفلوط', 'أبو تيج', 'الغنايم', 'ساحل سليم', 'البداري', 'صدفا'],
-  'سوهاج': ['سوهاج', 'أخميم', 'جرجا', 'طهطا', 'طما', 'البلينا', 'المراغة', 'منشأة القناطر', 'دار السلام', 'جهينة', 'ساقلتة'],
-  'قنا': ['قنا', 'الأقصر', 'نجع حمادي', 'قوص', 'دشنا', 'أبو تشت', 'فرشوط', 'نقادة', 'قفط'],
-  'الأقصر': ['الأقصر', 'إسنا', 'أرمنت', 'الطود', 'القرنة', 'البياضية', 'الزينية'],
-  'أسوان': ['أسوان', 'كوم أمبو', 'إدفو', 'نصر النوبة', 'أبو سمبل', 'دراو'],
-  'البحر الأحمر': ['الغردقة', 'سفاجا', 'القصير', 'مرسى علم', 'رأس غارب', 'شلاتين', 'حلايب'],
-  'شمال سيناء': ['العريش', 'الشيخ زويد', 'رفح', 'بئر العبد', 'الحسنة', 'الخلة'],
-  'جنوب سيناء': ['شرم الشيخ', 'دهب', 'نويبع', 'طابا', 'طور سيناء', 'رأس سدر', 'سانت كاترين', 'أبو زنيمة'],
-  'السويس': ['السويس', 'أربعين', 'عتاقة', 'فيصل', 'جناين'],
-  'الإسماعيلية': ['الإسماعيلية', 'فايد', 'القنطرة شرق', 'القنطرة غرب', 'أبو صوير', 'قصاصين', 'تل الكبير'],
-  'بور سعيد': ['بور سعيد', 'بور فؤاد', 'الزهور', 'الشرق', 'المناخ', 'العرب'],
-  'دمياط': ['دمياط', 'رأس البر', 'فارسكور', 'الزرقا', 'كفر سعد', 'كفر البطيخ', 'الروضة', 'سرو'],
-  'الوادي الجديد': ['الخارجة', 'الداخلة', 'الفرافرة', 'باريس', 'بلاط']
-};
-const GOVERNORATES = Object.keys(CITIES);
-function getCities(gov){return CITIES[gov]||[];}
+const ST={pending:'في الانتظار',accepted:'تم القبول وتأكيد الحجز',picked_up:'جاري النقل على الطريق',delivered:'تم التسليم بنجاح',cancelled:'ملغي'};
+const GOVERNORATES = ['القاهرة', 'الجيزة', 'الإسكندرية', 'الإسماعيلية', 'السويس', 'الغربية', 'المنوفية', 'الشرقية', 'الدقهلية', 'البحيرة', 'أسيوط', 'سوهاج', 'قنا', 'أسوان', 'البحر الأحمر', 'جنوب سيناء'];
 
-let me=null, mode='login';
-function card(o,btns=''){
-  return `<div class="card"><b>${esc(o.cargo_type)}</b> · ${esc(o.vehicle_needed||'')}<span class="tag">${ST[o.status]}</span><br>
-  من: ${esc(o.pickup_city)} - ${esc(o.pickup_address)}<br>إلى: ${esc(o.dropoff_city)} - ${esc(o.dropoff_address)}<br>
-  ${o.cargo_details?esc(o.cargo_details)+'<br>':''}السعر: ${esc(o.price)} ج.م${btns}</div>`;
+let me=null, mode='login', map=null, marker=null, selectedCoords={lat:30.0444, lng:31.2357};
+
+function card(o, btns='', contactInfo=''){
+  return `<div class="card">
+    <b>${esc(o.cargo_type)}</b> · ${esc(o.vehicle_needed||'')}<span class="tag">${ST[o.status]||o.status}</span><br>
+    <b>من:</b> ${esc(o.pickup_gov||'')} - ${esc(o.pickup_address)}<br>
+    <b>إلى:</b> ${esc(o.dropoff_gov||'')} - ${esc(o.dropoff_address)}<br>
+    ${o.needs_labor?`<span class="badge-b2b">👷 مطلوب عمال شيل وتحميل</span><br>`:''}
+    ${o.cargo_details?`<b>ملاحظات:</b> ${esc(o.cargo_details)}<br>`:''}
+    <b>السعر:</b> <span style="color:#d97706;font-weight:bold;">${esc(o.price)} ج.م</span>
+    <span class="badge-pay">${o.payment_method=='visa'?'💳 دفع إلكتروني':'💵 دفع نقدي كاش'}</span>
+    ${o.otp_code ? `<br>🔑 <b>كود التسليم السرّي (OTP):</b> <span style="color:red;font-weight:bold;">${esc(o.otp_code)}</span>` : ''}
+    ${contactInfo}
+    ${btns}
+  </div>`;
 }
+
 const btn=(act,id,txt,extra='')=>`<button class="sm" data-act="${act}" data-id="${esc(id)}" ${extra}>${txt}</button>`;
 
-/* ---------- الدخول والتسجيل ---------- */
+/* ---------- شاشة المصادقة وتسجيل الحسابات الشاملة ---------- */
 function authView(msg=''){
   $('#out').hidden=true;
-  app.innerHTML=`<div class="tabs"><button class="${mode=='login'?'on':''}" data-mode="login">دخول</button><button class="${mode=='signup'?'on':''}" data-mode="signup">حساب جديد</button></div>
+  app.innerHTML=`
+  <div class="tabs">
+    <button class="${mode=='login'?'on':''}" data-mode="login">تسجيل الدخول</button>
+    <button class="${mode=='signup'?'on':''}" data-mode="signup">حساب جديد معتمد</button>
+  </div>
   ${msg?`<div class="msg">${msg}</div>`:''}
-  <div class="card"><input id="em" type="email" placeholder="الإيميل" dir="ltr"><input id="pw" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" dir="ltr">
-  ${mode=='signup'?`<input id="nm" placeholder="الاسم"><input id="ph" placeholder="رقم الموبايل" dir="ltr"><input id="ct" placeholder="المدينة">
-  <select id="rl"><option value="client">عميل (عايز أنقل شحنة)</option><option value="driver">سائق (عندي عربية)</option></select>`:''}
-  <button id="go">${mode=='login'?'دخول':'إنشاء الحساب'}</button></div>`;
+  <div class="card">
+    <input id="em" type="email" placeholder="البريد الإلكتروني للشركة أو الأفراد" dir="ltr">
+    <input id="pw" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" dir="ltr">
+    ${mode=='signup'?`
+      <select id="rl" onchange="toggleRegFields()">
+        <option value="client">عميل فرد (شحنات شخصية أو منزلية)</option>
+        <option value="company">شركة / مصنع / مكتب نقل بري / صاحب محجر (B2B)</option>
+        <option value="driver">سائق أسطول نقل ثقيل / برادات / تريلا / ربع نقل</option>
+      </select>
+      
+      <input id="nm" placeholder="اسم المسؤول أو اسم الشركة/المصنع أو السائق">
+      <input id="ph" placeholder="رقم الهاتف الرسمي للتواصل (010xxxxxxxx)" dir="ltr">
+      
+      <!-- حقول خاصة بالأفراد والسائقين -->
+      <div id="individual_fields">
+        <input id="nid" placeholder="الرقم القومي (14 رقم رسمي موثق)" maxlength="14" dir="ltr">
+      </div>
+
+      <!-- حقول خاصة بالشركات والمصانع والمحاجر ومكاتب النقل -->
+      <div id="corporate_fields" style="display:none;">
+        <input id="tax_id" placeholder="الرقم الضريبي (للشركات والمصانع والمحاجر)" dir="ltr">
+        <input id="commercial_reg" placeholder="رقم السجل التجاري الرسمي" dir="ltr">
+      </div>
+
+      <select id="ct_gov">
+        <option value="">اختر المحافظة الرئيسية</option>
+        ${GOVERNORATES.map(g=>`<option value="${g}">${g}</option>`).join('')}
+      </select>
+
+      <div id="driver_extra" style="display:none;">
+        <input id="v_lic" placeholder="رقم رخصة القيادة / رخصة تسيير السيارة الثقيلة أو البراد">
+      </div>
+    `:''}
+    <button id="go">${mode=='login'?'دخول فوري':'إنشاء الحساب والتوثيق الرسمي 🛡️'}</button>
+  </div>`;
 }
+
+function toggleRegFields(){
+  const role = $('#rl').value;
+  $('#individual_fields').style.display = (role === 'company') ? 'none' : 'block';
+  $('#corporate_fields').style.display = (role === 'company') ? 'block' : 'none';
+  $('#driver_extra').style.display = (role === 'driver') ? 'block' : 'none';
+}
+
 async function doAuth(){
   const email=$('#em').value.trim(), password=$('#pw').value;
+  if(!email || !password) return authView('يرجى كتابة البريد وكلمة المرور');
+
   if(mode=='login'){
     const {data,error}=await sb.auth.signInWithPassword({email,password});
-    if(error) return authView('خطأ: '+esc(error.message));
+    if(error) return authView('خطأ في البيانات: '+esc(error.message));
     return load(data.user);
   }
-  const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:$('#nm').value,phone:$('#ph').value,city:$('#ct').value,role:$('#rl').value}}});
+  
+  const role = $('#rl').value;
+  let nid = '', taxId = '', commReg = '', vehicleLic = '';
+
+  if(role === 'company'){
+    taxId = $('#tax_id').value.trim();
+    commReg = $('#commercial_reg').value.trim();
+    if(!taxId || !commReg) return alert('الرقم الضريبي والسجل التجاري إلزامي لتوثيق حساب الشركات والمصانع والمحاجر.');
+  } else {
+    nid = $('#nid').value.trim();
+    if(nid.length !== 14) return alert('الرقم القومي يجب أن يكون 14 رقماً صحيحاً.');
+    if(role === 'driver') vehicleLic = $('#v_lic').value.trim();
+  }
+
+  const {data,error}=await sb.auth.signUp({
+    email, password,
+    options:{
+      data:{
+        full_name: $('#nm').value.trim(),
+        phone: $('#ph').value.trim(),
+        city: $('#ct_gov').value,
+        role: role,
+        national_id: nid,
+        tax_id: taxId,
+        commercial_register: commReg,
+        vehicle_license: vehicleLic
+      }
+    }
+  });
+  
   if(error) return authView('خطأ: '+esc(error.message));
-  if(!data.session){mode='login';return authView('تم إنشاء الحساب. افتح الإيميل واضغط رابط التأكيد ثم سجل دخول.');}
+  if(!data.session){mode='login';return authView('تم إنشاء الحساب بنجاح! تفقّد بريدك الإلكتروني لتفعيل الحساب.');}
   load(data.user);
 }
 
-/* ---------- تحميل البروفايل وتوجيه حسب الدور ---------- */
 async function load(u){
   const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).single();
-  if(!p) return authView('تعذر تحميل الحساب، جرّب تاني.');
+  if(!p) return authView('تعذر تحميل بيانات حسابك.');
   me=p; $('#out').hidden=false; render();
 }
-function render(){({client:clientView,driver:driverView,admin:adminView})[me.role]();}
 
-/* ---------- العميل ---------- */
-async function clientView(){
-  const {data}=await sb.from('orders').select('*').eq('client_id',me.id).order('created_at',{ascending:false});
-  app.innerHTML=`<h3>أهلاً ${esc(me.full_name||'')} 👋 اطلب نقلة جديدة</h3>
-  <div class="card"><select id="ct_">${opts(['أثاث','أجهزة كهربائية','بضائع محل','مواد بناء','أخرى'])}</select>
-  <select id="vh">${opts(['ربع نقل','نصف نقل','جامبو','تريلا'])}</select>
-  <input id="pc" placeholder="مدينة التحميل"><input id="pa" placeholder="عنوان التحميل">
-  <input id="dc" placeholder="مدينة التسليم"><input id="da" placeholder="عنوان التسليم">
-  <textarea id="dt" placeholder="تفاصيل الشحنة (اختياري)"></textarea>
-  <input id="pr" type="number" min="0" placeholder="السعر المعروض بالجنيه">
-  <button id="mk">إرسال الطلب</button></div>
-  <h3>طلباتي</h3>${(data||[]).map(o=>card(o,o.status=='pending'?btn('cancel',o.id,'إلغاء','class="sm sec"'):'')).join('')||'<div class="msg">مفيش طلبات لسه.</div>'}`;
+function render(){
+  if(me.role==='client' || me.role==='company') clientView();
+  else if(me.role==='driver') driverView();
+  else if(me.role==='admin') adminView();
 }
+
+/* ---------- لوحة العميل / الشركات / المصانع / المحاجر ---------- */
+async function clientView(){
+  const {data}=await sb.from('orders').select('*, drivers:driver_id(profiles(full_name, phone))').eq('client_id',me.id).order('created_at',{ascending:false});
+  
+  const isB2B = me.role === 'company';
+
+  app.innerHTML=`
+  <h3>مرحباً ${esc(me.full_name||'')} 👋 ${isB2B ? '<span class="badge-b2b">حساب أعمال ومصانع موثق 🏢</span>' : ''}</h3>
+  <div class="card">
+    <label>نوع البضاعة / مواد النقل:</label>
+    <select id="ct_">${['أثاث منزلي', 'بضائع مصانع وشركات', 'مواد بناء ومحاجر (رمال/زلط)', 'برادات ومواد غذائية مبردة', 'أجهزة كهربائية', 'بضائع تجارية عامة', 'أخرى'].map(x=>`<option>${x}</option>`).join('')}</select>
+    
+    <label>المركبة أو الأسطول المطلوب:</label>
+    <select id="vh">${['ربع نقل (خفيف)', 'نصف نقل', 'جامبو (متوسط)', 'تريلا ثقيلة', 'سيارة براد / تبريد مجمد', 'قلاب محاجر ثقيل', 'ونش إنقاذ'].map(x=>`<option>${x}</option>`).join('')}</select>
+    
+    <div class="grid-2">
+      <div>
+        <label>محافظة الانطلاق:</label>
+        <select id="pg">${GOVERNORATES.map(g=>`<option>${g}</option>`).join('')}</select>
+      </div>
+      <div>
+        <label>مدينة التحميل / المصنع / المحجر:</label>
+        <input id="pc" placeholder="مثال: العاشر من رمضان / محجر المقطم">
+      </div>
+    </div>
+    <input id="pa" placeholder="العنوان التفصيلي للتحميل">
+
+    <div class="grid-2">
+      <div>
+        <label>محافظة الوصول:</label>
+        <select id="dg">${GOVERNORATES.map(g=>`<option>${g}</option>`).join('')}</select>
+      </div>
+      <div>
+        <label>مدينة الوصول / التسليم:</label>
+        <input id="dc" placeholder="مثال: برج العرب الإسكندرية">
+      </div>
+    </div>
+    <input id="da" placeholder="العنوان التفصيلي للتسليم">
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="labor_chk">
+      <label for="labor_chk" style="cursor:pointer; font-weight:bold;">طلب عمال شيل وتحميل إضافيين مع الشاحنة 👷</label>
+    </div>
+
+    <label>طريقة الدفع:</label>
+    <select id="pay_method">
+      <option value="cash">💵 الدفع نقداً عند استلام البضاعة</option>
+      <option value="visa">💳 الدفع الإلكتروني الآمن (فيزا / تحويل بنكي للشركات)</option>
+    </select>
+
+    <textarea id="dt" placeholder="تعليمات خاصة للشحنة، درجات الحرارة المطلوبة للبرادات، أو أوزان المحاجر..."></textarea>
+    <input id="pr" type="number" min="0" placeholder="السعر المقترح للرحلة (جنيه مصري)">
+    
+    <div style="margin:10px 0;">
+      <b>حدد موقع التحميل الجغرافي:</b>
+      <button class="sm sec" id="get_gps" type="button">📍 موقعي الحالي (GPS)</button>
+      <div id="map"></div>
+    </div>
+
+    <button id="mk">إرسال الشحنة لشبكة السائقين 🚀</button>
+  </div>
+  
+  <h3>طلبات النقل والشحنات السابقة</h3>
+  ${(data||[]).map(o => {
+    let contact = '';
+    if(o.status != 'pending' && o.drivers?.profiles){
+      const drv = o.drivers.profiles;
+      contact = `<div class="secure-box">
+        <b>🚗 بيانات السائق المعتمَد للرحلة:</b><br>
+        الاسم: <b>${esc(drv.full_name)}</b><br>
+        الهاتف: <a href="tel:${esc(drv.phone)}">${esc(drv.phone)}</a><br>
+        <a href="tel:${esc(drv.phone)}" class="call-btn">📞 اتصل بالسائق الآن</a>
+      </div>`;
+    }
+    return card(o, o.status=='pending'?btn('cancel',o.id,'إلغاء الطلب','class="sm sec"'):'', contact);
+  }).join('') || '<div class="msg">لا توجد طلبات نقل مسجلة.</div>'}`;
+
+  setTimeout(initMap, 200);
+}
+
+function initMap(){
+  if(map) { map.remove(); map=null; }
+  map = L.map('map').setView([selectedCoords.lat, selectedCoords.lng], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+  marker = L.marker([selectedCoords.lat, selectedCoords.lng], {draggable: true}).addTo(map);
+  marker.on('dragend', e => { selectedCoords = e.target.getLatLng(); });
+  map.on('click', e => { marker.setLatLng(e.latlng); selectedCoords = e.latlng; });
+}
+
 async function makeOrder(){
   const v=i=>$(i).value.trim();
-  if(!v('#pc')||!v('#pa')||!v('#dc')||!v('#da')||!v('#pr')) return alert('كمّل كل البيانات');
-  const {error}=await sb.from('orders').insert({client_id:me.id,cargo_type:v('#ct_'),vehicle_needed:v('#vh'),pickup_city:v('#pc'),pickup_address:v('#pa'),dropoff_city:v('#dc'),dropoff_address:v('#da'),cargo_details:v('#dt'),price:+v('#pr')});
-  if(error) return alert(error.message);
+  if(!v('#pg')||!v('#pa')||!v('#dg')||!v('#da')||!v('#pr')) return alert('يرجى استكمال جميع تفاصيل التحميل والتسليم والسعر.');
+  
+  // توليد كود تسليم سرّي أوتوماتيكي (OTP)
+  const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+  const {error}=await sb.from('orders').insert({
+    client_id:me.id,
+    cargo_type:v('#ct_'),
+    vehicle_needed:v('#vh'),
+    pickup_gov:v('#pg'),
+    pickup_city:v('#pc'),
+    pickup_address:v('#pa'),
+    dropoff_gov:v('#dg'),
+    dropoff_city:v('#dc'),
+    dropoff_address:v('#da'),
+    cargo_details:v('#dt'),
+    needs_labor: $('#labor_chk').checked,
+    price:+v('#pr'),
+    payment_method:$('#pay_method').value,
+    pickup_lat:selectedCoords.lat,
+    pickup_lng:selectedCoords.lng,
+    otp_code: otpCode
+  });
+
+  if(error) return alert('خطأ في إرسال الطلب: '+error.message);
+  alert('تم إرسال الشحنة بنجاح لشبكة السائقين والمحاجر والبرادات!');
   clientView();
 }
 
-/* ---------- السائق ---------- */
+/* ---------- لوحة السائقين وأصحاب الأساطيل والبرادات ---------- */
 async function driverView(){
-  const {data:d}=await sb.from('drivers').select('*').eq('id',me.id).single();
-  if(!d||!d.approved){app.innerHTML='<div class="msg">حسابك في انتظار موافقة الإدارة. هتقدر تشوف الطلبات بعد الموافقة.</div>';return;}
-  const {data:all}=await sb.from('orders').select('*').order('created_at',{ascending:false});
-  const open=(all||[]).filter(o=>o.status=='pending'), mine=(all||[]).filter(o=>o.driver_id==me.id);
-  app.innerHTML=`<div class="card">مستحقات المنصة عليك (عمولة 15%): <b>${esc(d.balance_due)} ج.م</b></div>
-  <h3>طلبات متاحة</h3>${open.map(o=>card(o,btn('accept',o.id,'قبول الطلب'))).join('')||'<div class="msg">مفيش طلبات متاحة دلوقتي.</div>'}
-  <h3>رحلاتي</h3>${mine.map(o=>card(o,o.status=='accepted'?btn('pick',o.id,'تم الاستلام'):o.status=='picked_up'?btn('deliver',o.id,'تم التسليم'):'')).join('')||'<div class="msg">لسه مفيش رحلات.</div>'}`;
+  const {data:d}=await sb.from('drivers').select('*').eq('id',me.id).maybeSingle();
+  if(!d||!d.approved){
+    app.innerHTML='<div class="msg">⏳ حساب السائق/المركبة قيد المراجعة الأمنية والتوثيق الرسمي من الإدارة لضمان أمان العمليات.</div>';
+    return;
+  }
+  
+  const {data:all}=await sb.from('orders').select('*, profiles:client_id(full_name, phone)').order('created_at',{ascending:false});
+  const open=(all||[]).filter(o=>o.status=='pending');
+  const mine=(all||[]).filter(o=>o.driver_id==me.id);
+
+  app.innerHTML=`
+  <div class="card" style="border-right: 4px solid #f59e0b;">
+    <b>سائق معتمد رسمياً بـ "نقلة" ✅</b><br>
+    مستحقات المنصة: <b>${esc(d.balance_due||0)} ج.م</b> (الخدمة مجانية 0% حالياً)
+  </div>
+  
+  <h3>شحنات وطلبات متاحة للنقل</h3>
+  ${open.map(o=>card(o, btn('accept',o.id,'قبول الشحنة وتأكيد الحجز'))).join('')||'<div class="msg">لا توجد طلبات نقل متاحة حالياً.</div>'}
+  
+  <h3>رحلاتي الحالية والنشطة</h3>
+  ${mine.map(o => {
+    let contact = '';
+    if(o.profiles){
+      contact = `<div class="secure-box">
+        <b>🏢 بيانات العميل / الشركة:</b><br>
+        الاسم: <b>${esc(o.profiles.full_name)}</b><br>
+        الهاتف: <a href="tel:${esc(o.profiles.phone)}">${esc(o.profiles.phone)}</a><br>
+        <a href="tel:${esc(o.profiles.phone)}" class="call-btn">📞 اتصل بالعميل الآن</a>
+      </div>`;
+    }
+    return card(o, 
+      o.status=='accepted'?btn('pick',o.id,'تأكيد استلام الشحنة وبدء السير'):
+      o.status=='picked_up'?`<button class="sm" onclick="confirmDelivery('${o.id}')">🔐 أدخل كود التسليم (OTP) وإنهاء الرحلة</button>`:'',
+      contact
+    );
+  }).join('')||'<div class="msg">ليس لديك رحلات جارية.</div>'}`;
 }
 
-/* ---------- الإدارة ---------- */
+async function confirmDelivery(orderId){
+  const pin = prompt('أدخل كود التسليم السرّي (OTP) المستلم من العميل لإنهاء الرحلة:');
+  if(!pin) return;
+
+  const {data:ord}=await sb.from('orders').select('otp_code').eq('id',orderId).single();
+  if(!ord || ord.otp_code !== pin.trim()){
+    return alert('كود التسليم غير صحيح! تأكد من العميل.');
+  }
+
+  const {error} = await sb.rpc('update_order_status',{p_order_id:orderId, p_status:'delivered'});
+  if(error) return alert('خطأ: '+error.message);
+  alert('تم تسليم الشحنة بنجاح وتوثيق العملية في النظام!');
+  driverView();
+}
+
+/* ---------- لوحة الإدارة والأمان والتنظيم القانوني ---------- */
 async function adminView(){
-  const {data:ds}=await sb.from('drivers').select('*,profiles(full_name,phone,city)');
+  const {data:ds}=await sb.from('drivers').select('*,profiles(full_name,phone,city,national_id,tax_id,commercial_register,vehicle_license,role)');
   const {data:os}=await sb.from('orders').select('*').order('created_at',{ascending:false});
-  app.innerHTML=`<h3>السائقين</h3>${(ds||[]).map(d=>`<div class="card"><b>${esc(d.profiles?.full_name||'-')}</b> · ${esc(d.profiles?.phone||'')} · ${esc(d.profiles?.city||'')}<br>
-  الحالة: ${d.approved?'معتمد ✅':'غير معتمد ⏳'} · المستحق: ${esc(d.balance_due)} ج.م<br>
-  ${btn('approve',d.id,d.approved?'إيقاف':'اعتماد',`data-v="${!d.approved}"`)}${btn('pay',d.id,'تسجيل سداد')}</div>`).join('')||'<div class="msg">مفيش سائقين.</div>'}
-  <h3>كل الطلبات (${(os||[]).length})</h3>${(os||[]).map(o=>card(o)).join('')}`;
+  
+  app.innerHTML=`
+  <h3>مراجعة وتوثيق هويات الأفراد، الشركات، المصانع، والمحاجر (الأمان والرقابة)</h3>
+  ${(ds||[]).map(d=>`<div class="card">
+    <b>الاسم/الجهة: ${esc(d.profiles?.full_name\vert{}\vert{}'-')}</b> (${esc(d.profiles?.role||'driver')})<br>
+    📞 الهاتف: ${esc(d.profiles?.phone||'')}<br>
+    📍 المحافظة: ${esc(d.profiles?.city||'')}<br>
+    🆔 <b>الرقم القومي:</b> ${esc(d.profiles?.national_id||'غير مسجل')}<br>
+    🏢 <b>السجل التجاري / الرقم الضريبي:</b> ${esc(d.profiles?.commercial_register\vert{}\vert{}'فرد/سائق')} / ${esc(d.profiles?.tax_id||'-')}<br>
+    🚛 <b>رخصة المركبة/البراد:</b> ${esc(d.profiles?.vehicle_license||'غير متوفرة')}<br>
+    حالة الحساب: ${d.approved?'موثق ومعتمد رسميًا ✅':'قيد المراجعة الأمنية والتوثيق ⏳'}<br>
+    ${btn('approve',d.id,d.approved?'إيقاف الحساب':'اعتماد وتوثيق الحساب رسميًا',`data-v="${!d.approved}"`)}
+  </div>`).join('')||'<div class="msg">لا يوجد مستخدمين قيد المراجعة.</div>'}
+  
+  <h3>سجل جميع طلبات وشحنات المنصة (${(os||[]).length})</h3>
+  ${(os||[]).map(o=>card(o)).join('')}`;
 }
 
-/* ---------- الأحداث ---------- */
+/* ---------- أحداث النظام ---------- */
 document.addEventListener('click',async e=>{
   const t=e.target;
   if(t.dataset.mode){mode=t.dataset.mode;return authView();}
   if(t.id=='go') return doAuth();
   if(t.id=='mk') return makeOrder();
   if(t.id=='out'){await sb.auth.signOut();me=null;return authView();}
+  
+  if(t.id=='get_gps'){
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        selectedCoords = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+        if(map) { map.setView([selectedCoords.lat, selectedCoords.lng], 15); marker.setLatLng([selectedCoords.lat, selectedCoords.lng]); }
+        alert('تم تحديد موقعك بدقة عبر الـ GPS!');
+      }, ()=>alert('تعذر تحديد الموقع. السماح للمتصفح بالموقع مطلوب.'));
+    } else { alert('GPS غير مدعوم في متصفحك.'); }
+    return;
+  }
+
   const a=t.dataset.act; if(!a) return;
   const id=t.dataset.id; let r;
-  if(a=='cancel') r=await sb.rpc('cancel_order',{p_order_id:+id});
-  if(a=='accept') r=await sb.rpc('accept_order',{p_order_id:+id});
-  if(a=='pick') r=await sb.rpc('update_order_status',{p_order_id:+id,p_status:'picked_up'});
-  if(a=='deliver') r=await sb.rpc('update_order_status',{p_order_id:+id,p_status:'delivered'});
+  
+  if(a=='cancel') r=await sb.rpc('cancel_order',{p_order_id:id});
+  if(a=='accept') r=await sb.rpc('accept_order',{p_order_id:id});
   if(a=='approve') r=await sb.rpc('admin_approve_driver',{p_driver_id:id,p_approved:t.dataset.v=='true'});
-  if(a=='pay'){const m=prompt('المبلغ المسدّد بالجنيه:'); if(!m) return; r=await sb.rpc('admin_record_payment',{p_driver_id:id,p_amount:+m});}
-  if(r&&r.error) alert(r.error.message);
+  
+  if(r && r.error) alert('خطأ: '+r.error.message);
   render();
 });
+
 sb.auth.getSession().then(({data:{session}})=>session?load(session.user):authView());
 </script>
-  <!-- زر واتساب للدعم والشكاوى -->
-<a href="https://wa.me/201008781263?text=أهلاً%20منصة%20نقلة،%20عندي%20استفسار" 
-   class="whatsapp-btn" 
-   target="_blank">
-    💬 الدعم والشكاوى (واتساب)
-</a>
-
-<style>
-.whatsapp-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background-color: #25d366;
-    color: #ffffff;
-    padding: 12px 18px;
-    border-radius: 25px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 9999;
-}
-</style>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/naqla/sw.js').catch(() => {});
-    });
-  }
-</script>
-    
 </body>
 </html>
