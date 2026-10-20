@@ -39,7 +39,7 @@ h3{margin:20px 0 8px;color:#111}
 
 <div style="background-color:#e8f5e9;border:1px solid #4caf50;padding:10px;border-radius:10px;text-align:center;margin:10px 10px 0;">
     <span style="color:#2e7d32;font-weight:bold;font-size:13px;">
-        🛡️ منصة نقلة الرسمية والمؤمنة للشركات، المصانع، أصحاب المحاجر، البرادات وسائقي النقل الثقيل[span_3](start_span)[span_3](end_span)
+        🛡️ منصة نقلة الرسمية والمؤمنة للشركات، المصانع، أصحاب المحاجر، البرادات وسائقي النقل الثقيل
     </span>
 </div>
 
@@ -369,11 +369,11 @@ async function adminView(){
   app.innerHTML = `
   <h3>مراجعة وتوثيق هويات الأفراد، الشركات، المصانع، والمحاجر (الأمان والرقابة)</h3>
   ${(ds||[]).map(d=>`<div class="card">
-    <b>الاسم/الجهة: ${esc(d.profiles?.full_name\vert{}\vert{}'-')}</b> (${esc(d.profiles?.role||'driver')})<br>
+    <b>الاسم/الجهة: ${esc(d.profiles?.full_name \vert{}\vert{} '-')}</b> (${esc(d.profiles?.role||'driver')})<br>
     📞 الهاتف: ${esc(d.profiles?.phone||'')}<br>
     📍 المحافظة: ${esc(d.profiles?.city||'')}<br>
     🆔 <b>الرقم القومي:</b> ${esc(d.profiles?.national_id||'غير مسجل')}<br>
-    🏢 <b>السجل التجاري / الرقم الضريبي:</b> ${esc(d.profiles?.commercial_register\vert{}\vert{}'فرد/سائق')} / ${esc(d.profiles?.tax_id||'-')}<br>
+    🏢 <b>السجل التجاري / الرقم الضريبي:</b> ${esc(d.profiles?.commercial_register \vert{}\vert{} 'فرد/سائق')} / ${esc(d.profiles?.tax_id || '-')}<br>
     🚛 <b>رخصة المركبة/البراد:</b> ${esc(d.profiles?.vehicle_license||'غير متوفرة')}<br>
     حالة الحساب: ${d.approved?'موثق ومعتمد رسميًا ✅':'قيد المراجعة الأمنية والتوثيق ⏳'}<br>
     ${btn('approve', d.id, d.approved?'إيقاف الحساب':'اعتماد وتوثيق الحساب رسميًا', `data-v="${!d.approved}"`)}
