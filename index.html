@@ -6,7 +6,7 @@
 <title>نقلة | NAQLA - المنصة الذكية المتكاملة للنقل البري واللوجستيات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="manifest" href="/naqla/manifest.json">
+<link rel="manifest" href="./manifest.json">
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Cairo,Tahoma,Arial,sans-serif;background:#f4f4f4;color:#111;padding-bottom:80px}
@@ -39,7 +39,7 @@ h3{margin:20px 0 8px;color:#111}
 
 <div style="background-color:#e8f5e9;border:1px solid #4caf50;padding:10px;border-radius:10px;text-align:center;margin:10px 10px 0;">
     <span style="color:#2e7d32;font-weight:bold;font-size:13px;">
-        🛡️ منصة نقلة الرسمية والمؤمنة للشركات، المصانع، أصحاب المحاجر، البرادات وسائقي النقل الثقيل
+        🛡️ منصة نقلة الرسمية والمؤمنة للشركات، المصانع، أصحاب المحاجر، البرادات وسائقي النقل الثقيل[span_3](start_span)[span_3](end_span)
     </span>
 </div>
 
@@ -57,13 +57,13 @@ h3{margin:20px 0 8px;color:#111}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const sb=supabase.createClient('https://imzuqnhjlgjyokvjxwog.supabase.co','sb_publishable_grSfHJ_E2NmVSxZjVjM5rg_xE8ZX1Hn');
-const $=s=>document.querySelector(s), app=$('#app');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const ST={pending:'في الانتظار',accepted:'تم القبول وتأكيد الحجز',picked_up:'جاري النقل على الطريق',delivered:'تم التسليم بنجاح',cancelled:'ملغي'};
+const sb = supabase.createClient('https://imzuqnhjlgjyokvjxwog.supabase.co','sb_publishable_grSfHJ_E2NmVSxZjVjM5rg_xE8ZX1Hn');
+const $= s => document.querySelector(s), app =$('#app');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST = {pending:'في الانتظار',accepted:'تم القبول وتأكيد الحجز',picked_up:'جاري النقل على الطريق',delivered:'تم التسليم بنجاح',cancelled:'ملغي'};
 const GOVERNORATES = ['القاهرة', 'الجيزة', 'الإسكندرية', 'الإسماعيلية', 'السويس', 'الغربية', 'المنوفية', 'الشرقية', 'الدقهلية', 'البحيرة', 'أسيوط', 'سوهاج', 'قنا', 'أسوان', 'البحر الأحمر', 'جنوب سيناء'];
 
-let me=null, mode='login', map=null, marker=null, selectedCoords={lat:30.0444, lng:31.2357};
+let me = null, mode = 'login', map = null, marker = null, selectedCoords = {lat: 30.0444, lng: 31.2357};
 
 function card(o, btns='', contactInfo=''){
   return `<div class="card">
@@ -80,12 +80,11 @@ function card(o, btns='', contactInfo=''){
   </div>`;
 }
 
-const btn=(act,id,txt,extra='')=>`<button class="sm" data-act="${act}" data-id="${esc(id)}" ${extra}>${txt}</button>`;
+const btn = (act,id,txt,extra='') => `<button class="sm" data-act="${act}" data-id="${esc(id)}" ${extra}>${txt}</button>`;
 
-/* ---------- شاشة المصادقة وتسجيل الحسابات ---------- */
 function authView(msg=''){
-  $('#out').hidden=true;
-  app.innerHTML=`
+  $('#out').hidden = true;
+  app.innerHTML = `
   <div class="tabs">
     <button class="${mode=='login'?'on':''}" data-mode="login">تسجيل الدخول</button>
     <button class="${mode=='signup'?'on':''}" data-mode="signup">حساب جديد معتمد</button>
@@ -134,11 +133,11 @@ function toggleRegFields(){
 }
 
 async function doAuth(){
-  const email=$('#em').value.trim(), password=$('#pw').value;
+  const email = $('#em').value.trim(), password = $('#pw').value;
   if(!email || !password) return authView('يرجى كتابة البريد وكلمة المرور');
 
   if(mode=='login'){
-    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    const {data, error} = await sb.auth.signInWithPassword({email, password});
     if(error) return authView('خطأ في البيانات: '+esc(error.message));
     return load(data.user);
   }
@@ -156,7 +155,7 @@ async function doAuth(){
     if(role === 'driver') vehicleLic = $('#v_lic').value.trim();
   }
 
-  const {data,error}=await sb.auth.signUp({
+  const {data, error} = await sb.auth.signUp({
     email, password,
     options:{
       data:{
@@ -173,29 +172,30 @@ async function doAuth(){
   });
   
   if(error) return authView('خطأ: '+esc(error.message));
-  if(!data.session){mode='login';return authView('تم إنشاء الحساب بنجاح! تفقّد بريدك الإلكتروني لتفعيل الحساب.');}
+  if(!data.session){ mode='login'; return authView('تم إنشاء الحساب بنجاح! تفقّد بريدك الإلكتروني لتفعيل الحساب.'); }
   load(data.user);
 }
 
 async function load(u){
-  const {data:p}=await sb.from('profiles').select('*').eq('id',u.id).single();
-  if(!p) return authView('تعذر تحميل بيانات حسابك.');
-  me=p; $('#out').hidden=false; render();
+  const {data:p, error} = await sb.from('profiles').select('*').eq('id', u.id).maybeSingle();
+  if(error || !p) return authView('تعذر تحميل بيانات حسابك أو إعداد الملف الشخصي.');
+  me = p; 
+  $('#out').hidden = false; 
+  render();
 }
 
 function render(){
-  if(me.role==='client' || me.role==='company') clientView();
-  else if(me.role==='driver') driverView();
-  else if(me.role==='admin') adminView();
+  if(me.role === 'client' || me.role === 'company') clientView();
+  else if(me.role === 'driver') driverView();
+  else if(me.role === 'admin') adminView();
+  else clientView();
 }
 
-/* ---------- لوحة العميل / الشركات / المصانع ---------- */
 async function clientView(){
-  const {data}=await sb.from('orders').select('*, drivers:driver_id(profiles(full_name, phone))').eq('client_id',me.id).order('created_at',{ascending:false});
-  
+  const {data} = await sb.from('orders').select('*, drivers:driver_id(profiles(full_name, phone))').eq('client_id', me.id).order('created_at', {ascending:false});
   const isB2B = me.role === 'company';
 
-  app.innerHTML=`
+  app.innerHTML = `
   <h3>مرحباً ${esc(me.full_name||'')} 👋 ${isB2B ? '<span class="badge-b2b">حساب أعمال ومصانع موثق 🏢</span>' : ''}</h3>
   <div class="card">
     <label>نوع البضاعة / مواد النقل:</label>
@@ -270,7 +270,7 @@ async function clientView(){
 }
 
 function initMap(){
-  if(map) { map.remove(); map=null; }
+  if(map) { map.remove(); map = null; }
   map = L.map('map').setView([selectedCoords.lat, selectedCoords.lng], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
   marker = L.marker([selectedCoords.lat, selectedCoords.lng], {draggable: true}).addTo(map);
@@ -279,27 +279,27 @@ function initMap(){
 }
 
 async function makeOrder(){
-  const v=i=>$(i).value.trim();
-  if(!v('#pg')||!v('#pa')||!v('#dg')||!v('#da')||!v('#pr')) return alert('يرجى استكمال جميع تفاصيل التحميل والتسليم والسعر.');
+  const v = i => $(i).value.trim();
+  if(!v('#pg') || !v('#pa') || !v('#dg') || !v('#da') || !v('#pr')) return alert('يرجى استكمال جميع تفاصيل التحميل والتسليم والسعر.');
   
   const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-  const {error}=await sb.from('orders').insert({
-    client_id:me.id,
-    cargo_type:v('#ct_'),
-    vehicle_needed:v('#vh'),
-    pickup_gov:v('#pg'),
-    pickup_city:v('#pc'),
-    pickup_address:v('#pa'),
-    dropoff_gov:v('#dg'),
-    dropoff_city:v('#dc'),
-    dropoff_address:v('#da'),
-    cargo_details:v('#dt'),
+  const {error} = await sb.from('orders').insert({
+    client_id: me.id,
+    cargo_type: v('#ct_'),
+    vehicle_needed: v('#vh'),
+    pickup_gov: v('#pg'),
+    pickup_city: v('#pc'),
+    pickup_address: v('#pa'),
+    dropoff_gov: v('#dg'),
+    dropoff_city: v('#dc'),
+    dropoff_address: v('#da'),
+    cargo_details: v('#dt'),
     needs_labor: $('#labor_chk').checked,
-    price:+v('#pr'),
-    payment_method:$('#pay_method').value,
-    pickup_lat:selectedCoords.lat,
-    pickup_lng:selectedCoords.lng,
+    price: +v('#pr'),
+    payment_method: $('#pay_method').value,
+    pickup_lat: selectedCoords.lat,
+    pickup_lng: selectedCoords.lng,
     otp_code: otpCode
   });
 
@@ -308,26 +308,25 @@ async function makeOrder(){
   clientView();
 }
 
-/* ---------- لوحة السائقين ---------- */
 async function driverView(){
-  const {data:d}=await sb.from('drivers').select('*').eq('id',me.id).maybeSingle();
-  if(!d||!d.approved){
-    app.innerHTML='<div class="msg">⏳ حساب السائق/المركبة قيد المراجعة الأمنية والتوثيق الرسمي من الإدارة لضمان أمان العمليات.</div>';
+  const {data:d} = await sb.from('drivers').select('*').eq('id', me.id).maybeSingle();
+  if(!d || !d.approved){
+    app.innerHTML = '<div class="msg">⏳ حساب السائق/المركبة قيد المراجعة الأمنية والتوثيق الرسمي من الإدارة لضمان أمان العمليات.</div>';
     return;
   }
   
-  const {data:all}=await sb.from('orders').select('*, profiles:client_id(full_name, phone)').order('created_at',{ascending:false});
-  const open=(all||[]).filter(o=>o.status=='pending');
-  const mine=(all||[]).filter(o=>o.driver_id==me.id);
+  const {data:all} = await sb.from('orders').select('*, profiles:client_id(full_name, phone)').order('created_at', {ascending:false});
+  const open = (all||[]).filter(o => o.status == 'pending');
+  const mine = (all||[]).filter(o => o.driver_id == me.id);
 
-  app.innerHTML=`
+  app.innerHTML = `
   <div class="card" style="border-right: 4px solid #f59e0b;">
     <b>سائق معتمد رسمياً بـ "نقلة" ✅</b><br>
     مستحقات المنصة: <b>${esc(d.balance_due||0)} ج.م</b> (الخدمة مجانية 0% حالياً)
   </div>
   
   <h3>شحنات وطلبات متاحة للنقل</h3>
-  ${open.map(o=>card(o, btn('accept',o.id,'قبول الشحنة وتأكيد الحجز'))).join('')||'<div class="msg">لا توجد طلبات نقل متاحة حالياً.</div>'}
+  ${open.map(o => card(o, btn('accept', o.id, 'قبول الشحنة وتأكيد الحجز'))).join('') || '<div class="msg">لا توجد طلبات نقل متاحة حالياً.</div>'}
   
   <h3>رحلاتي الحالية والنشطة</h3>
   ${mine.map(o => {
@@ -345,30 +344,29 @@ async function driverView(){
       o.status=='picked_up'?`<button class="sm" onclick="confirmDelivery('${o.id}')">🔐 أدخل كود التسليم (OTP) وإنهاء الرحلة</button>`:'',
       contact
     );
-  }).join('')||'<div class="msg">ليس لديك رحلات جارية.</div>'}`;
+  }).join('') || '<div class="msg">ليس لديك رحلات جارية.</div>'}`;
 }
 
 async function confirmDelivery(orderId){
   const pin = prompt('أدخل كود التسليم السرّي (OTP) المستلم من العميل لإنهاء الرحلة:');
   if(!pin) return;
 
-  const {data:ord}=await sb.from('orders').select('otp_code').eq('id',orderId).single();
+  const {data:ord} = await sb.from('orders').select('otp_code').eq('id', orderId).single();
   if(!ord || ord.otp_code !== pin.trim()){
     return alert('كود التسليم غير صحيح! تأكد من العميل.');
   }
 
-  const {error} = await sb.rpc('update_order_status',{p_order_id:orderId, p_status:'delivered'});
+  const {error} = await sb.rpc('update_order_status', {p_order_id: orderId, p_status: 'delivered'});
   if(error) return alert('خطأ: '+error.message);
   alert('تم تسليم الشحنة بنجاح وتوثيق العملية في النظام!');
   driverView();
 }
 
-/* ---------- لوحة الإدارة ---------- */
 async function adminView(){
-  const {data:ds}=await sb.from('drivers').select('*,profiles(full_name,phone,city,national_id,tax_id,commercial_register,vehicle_license,role)');
-  const {data:os}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+  const {data:ds} = await sb.from('drivers').select('*,profiles(full_name,phone,city,national_id,tax_id,commercial_register,vehicle_license,role)');
+  const {data:os} = await sb.from('orders').select('*').order('created_at', {ascending:false});
   
-  app.innerHTML=`
+  app.innerHTML = `
   <h3>مراجعة وتوثيق هويات الأفراد، الشركات، المصانع، والمحاجر (الأمان والرقابة)</h3>
   ${(ds||[]).map(d=>`<div class="card">
     <b>الاسم/الجهة: ${esc(d.profiles?.full_name\vert{}\vert{}'-')}</b> (${esc(d.profiles?.role||'driver')})<br>
@@ -378,50 +376,51 @@ async function adminView(){
     🏢 <b>السجل التجاري / الرقم الضريبي:</b> ${esc(d.profiles?.commercial_register\vert{}\vert{}'فرد/سائق')} / ${esc(d.profiles?.tax_id||'-')}<br>
     🚛 <b>رخصة المركبة/البراد:</b> ${esc(d.profiles?.vehicle_license||'غير متوفرة')}<br>
     حالة الحساب: ${d.approved?'موثق ومعتمد رسميًا ✅':'قيد المراجعة الأمنية والتوثيق ⏳'}<br>
-    ${btn('approve',d.id,d.approved?'إيقاف الحساب':'اعتماد وتوثيق الحساب رسميًا',`data-v="${!d.approved}"`)}
-  </div>`).join('')||'<div class="msg">لا يوجد مستخدمين قيد المراجعة.</div>'}
+    ${btn('approve', d.id, d.approved?'إيقاف الحساب':'اعتماد وتوثيق الحساب رسميًا', `data-v="${!d.approved}"`)}
+  </div>`).join('') || '<div class="msg">لا يوجد مستخدمين قيد المراجعة.</div>'}
   
   <h3>سجل جميع طلبات وشحنات المنصة (${(os||[]).length})</h3>
-  ${(os||[]).map(o=>card(o)).join('')}`;
+  ${(os||[]).map(o => card(o)).join('')}`;
 }
 
-/* ---------- أحداث النظام ---------- */
-document.addEventListener('click',async e=>{
-  const t=e.target;
-  if(t.dataset.mode){mode=t.dataset.mode;return authView();}
-  if(t.id=='go') return doAuth();
-  if(t.id=='mk') return makeOrder();
-  if(t.id=='out'){await sb.auth.signOut();me=null;return authView();}
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if(t.dataset.mode){ mode = t.dataset.mode; return authView(); }
+  if(t.id == 'go') return doAuth();
+  if(t.id == 'mk') return makeOrder();
+  if(t.id == 'out'){ await sb.auth.signOut(); me = null; return authView(); }
   
-  if(t.id=='get_gps'){
+  if(t.id == 'get_gps'){
     if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{
+      navigator.geolocation.getCurrentPosition(pos => {
         selectedCoords = {lat: pos.coords.latitude, lng: pos.coords.longitude};
         if(map) { map.setView([selectedCoords.lat, selectedCoords.lng], 15); marker.setLatLng([selectedCoords.lat, selectedCoords.lng]); }
         alert('تم تحديد موقعك بدقة عبر الـ GPS!');
-      }, ()=>alert('تعذر تحديد الموقع. السماح للمتصفح بالموقع مطلوب.'));
+      }, () => alert('تعذر تحديد الموقع. السماح للمتصفح بالموقع مطلوب.'));
     } else { alert('GPS غير مدعوم في متصفحك.'); }
     return;
   }
 
-  const a=t.dataset.act; if(!a) return;
-  const id=t.dataset.id; let r;
+  const a = t.dataset.act; if(!a) return;
+  const id = t.dataset.id; let r;
   
-  if(a=='cancel') r=await sb.rpc('cancel_order',{p_order_id:id});
-  if(a=='accept') r=await sb.rpc('accept_order',{p_order_id:id});
-  if(a=='approve') r=await sb.rpc('admin_approve_driver',{p_driver_id:id,p_approved:t.dataset.v=='true'});
+  if(a == 'cancel') r = await sb.rpc('cancel_order', {p_order_id: id});
+  if(a == 'accept') r = await sb.rpc('accept_order', {p_order_id: id});
+  if(a == 'approve') r = await sb.rpc('admin_approve_driver', {p_driver_id: id, p_approved: t.dataset.v == 'true'});
   
   if(r && r.error) alert('خطأ: '+r.error.message);
   render();
 });
 
-// التشغيل والبدء الفوري
-sb.auth.getSession().then(({data:{session}})=> {
-  if(session) {
+// بدء التشغيل وفحص الجلسة بشكل آمن مع معالجة الأخطاء
+sb.auth.getSession().then(({data:{session}}) => {
+  if(session && session.user) {
     load(session.user);
   } else {
     authView();
   }
+}).catch(() => {
+  authView();
 });
 </script>
 </body>
