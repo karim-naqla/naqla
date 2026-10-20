@@ -82,7 +82,7 @@ function card(o, btns='', contactInfo=''){
 
 const btn=(act,id,txt,extra='')=>`<button class="sm" data-act="${act}" data-id="${esc(id)}" ${extra}>${txt}</button>`;
 
-/* ---------- شاشة المصادقة وتسجيل الحسابات الشاملة ---------- */
+/* ---------- شاشة المصادقة وتسجيل الحسابات ---------- */
 function authView(msg=''){
   $('#out').hidden=true;
   app.innerHTML=`
@@ -104,12 +104,10 @@ function authView(msg=''){
       <input id="nm" placeholder="اسم المسؤول أو اسم الشركة/المصنع أو السائق">
       <input id="ph" placeholder="رقم الهاتف الرسمي للتواصل (010xxxxxxxx)" dir="ltr">
       
-      <!-- حقول خاصة بالأفراد والسائقين -->
       <div id="individual_fields">
         <input id="nid" placeholder="الرقم القومي (14 رقم رسمي موثق)" maxlength="14" dir="ltr">
       </div>
 
-      <!-- حقول خاصة بالشركات والمصانع والمحاجر ومكاتب النقل -->
       <div id="corporate_fields" style="display:none;">
         <input id="tax_id" placeholder="الرقم الضريبي (للشركات والمصانع والمحاجر)" dir="ltr">
         <input id="commercial_reg" placeholder="رقم السجل التجاري الرسمي" dir="ltr">
@@ -191,7 +189,7 @@ function render(){
   else if(me.role==='admin') adminView();
 }
 
-/* ---------- لوحة العميل / الشركات / المصانع / المحاجر ---------- */
+/* ---------- لوحة العميل / الشركات / المصانع ---------- */
 async function clientView(){
   const {data}=await sb.from('orders').select('*, drivers:driver_id(profiles(full_name, phone))').eq('client_id',me.id).order('created_at',{ascending:false});
   
@@ -284,7 +282,6 @@ async function makeOrder(){
   const v=i=>$(i).value.trim();
   if(!v('#pg')||!v('#pa')||!v('#dg')||!v('#da')||!v('#pr')) return alert('يرجى استكمال جميع تفاصيل التحميل والتسليم والسعر.');
   
-  // توليد كود تسليم سرّي أوتوماتيكي (OTP)
   const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
 
   const {error}=await sb.from('orders').insert({
@@ -311,7 +308,7 @@ async function makeOrder(){
   clientView();
 }
 
-/* ---------- لوحة السائقين وأصحاب الأساطيل والبرادات ---------- */
+/* ---------- لوحة السائقين ---------- */
 async function driverView(){
   const {data:d}=await sb.from('drivers').select('*').eq('id',me.id).maybeSingle();
   if(!d||!d.approved){
@@ -366,7 +363,7 @@ async function confirmDelivery(orderId){
   driverView();
 }
 
-/* ---------- لوحة الإدارة والأمان والتنظيم القانوني ---------- */
+/* ---------- لوحة الإدارة ---------- */
 async function adminView(){
   const {data:ds}=await sb.from('drivers').select('*,profiles(full_name,phone,city,national_id,tax_id,commercial_register,vehicle_license,role)');
   const {data:os}=await sb.from('orders').select('*').order('created_at',{ascending:false});
@@ -418,7 +415,14 @@ document.addEventListener('click',async e=>{
   render();
 });
 
-sb.auth.getSession().then(({data:{session}})=>session?load(session.user):authView());
+// التشغيل والبدء الفوري
+sb.auth.getSession().then(({data:{session}})=> {
+  if(session) {
+    load(session.user);
+  } else {
+    authView();
+  }
+});
 </script>
 </body>
 </html>
